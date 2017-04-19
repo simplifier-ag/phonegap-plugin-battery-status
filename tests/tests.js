@@ -44,6 +44,51 @@ exports.defineAutoTests = function () {
         });
     });
 
+    describe('Plugin conforms to w3c specs', function() {
+
+        it("navigator.getBattery should exist", function(){
+            expect(navigator.getBattery).toBeDefined();
+            expect(typeof navigator.getBattery).toBe('function');
+        });
+
+        it('getBattery should return a promise with attributes of Battery Interface', function(done){
+            try{
+                var promise = navigator.getBattery();
+                expect(typeof promise.then).toBe('function');
+                promise.then(function (battery){
+                    expect(battery).toBeDefined();
+                    expect(typeof battery).toBe('object');
+                    expect(battery.charging).toBeDefined();
+                    expect(battery.chargingTime).toBeDefined();
+                    expect(battery.dischargingTime).toBeDefined();
+                    expect(battery.level).toBeDefined();
+                    expect(battery.onchargingchange).toBeDefined();
+                    expect(battery.onchargingtimechange).toBeDefined();
+                    expect(battery.ondischargingtimechange).toBeDefined();
+                    expect(battery.onlevelchange).toBeDefined();
+                    expect(typeof battery.charging).toBe('boolean');
+                    expect(typeof battery.chargingTime).toBe('number');
+                    expect(typeof battery.dischargingTime).toBe('number');
+                    expect(typeof battery.level).toBe('number');
+                    expect(battery.addEventListener).toBeDefined();
+                    expect(typeof battery.addEventListener).toBe('function');
+                    expect(battery.removeEventListener).toBeDefined();
+                    expect(typeof battery.removeEventListener).toBe('function');
+                    done();
+                }, function(err) {
+                    expect(err).toBeDefined();
+                    fail(err);
+                    done();
+                });
+            } catch (err) {
+                fail(err);
+                done();
+            }
+
+        });
+
+    });
+
     describe('Battery Events', function () {
 
         describe("batterystatus", function () {
