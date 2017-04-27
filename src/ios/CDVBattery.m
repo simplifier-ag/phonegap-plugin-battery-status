@@ -86,7 +86,7 @@
     if (currentLevel == -1.0) {
         w3cLevel = [NSNumber numberWithInteger:0];
     } else {
-        w3cLevel = [NSNumber numberWithFloat:(currentLevel * 100)];
+        w3cLevel = [NSNumber numberWithFloat:currentLevel];
     }
 
 

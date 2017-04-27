@@ -29,7 +29,7 @@ var BatteryManager = function() {
   this.charging = true;
   this.chargingTime = 0;
   this.dischargingTime = Number.POSITIVE_INFINITY;
-  this.level = 0;
+  this.level = 1.0;
   this._handlers = {
     'chargingchange': [],
     'chargingtimechange': [],
@@ -44,28 +44,22 @@ var BatteryManager = function() {
 
   var that = this;
   var success = function(batteryInfo) {
-    console.log("battery: " + JSON.stringify(that));
-    console.log("batteryInfo: " + JSON.stringify(batteryInfo));
     if (that.charging !== batteryInfo.charging) {
-      console.log('firing charge event');
       that.charging = batteryInfo.charging;
       that.onchargingchange();
       that.emit('chargingchange');
     }
     if (that.chargingTime !== batteryInfo.chargingTime) {
-      console.log('firing chargingTime event');
       that.chargingTime = batteryInfo.chargingTime;
       that.onchargingtimechange();
       that.emit('chargingtimechange');
     }
     if (that.dischargingTime !== batteryInfo.dischargingTime) {
-      console.log('firing dischargingTime event');
       that.dischargingTime = batteryInfo.dischargingTime;
       that.ondischargingtimechange();
       that.emit('dischargingtimechange');
     }
     if (that.level !== batteryInfo.level) {
-      console.log('firing level event');
       that.level = batteryInfo.level;
       that.onlevelchange();
       that.emit('levelchange');

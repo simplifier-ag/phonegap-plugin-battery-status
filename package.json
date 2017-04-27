@@ -7,14 +7,7 @@
     "id": "cordova-plugin-battery-status",
     "platforms": [
       "android",
-      "amazon-fireos",
-      "ubuntu",
-      "ios",
-      "blackberry10",
-      "wp7",
-      "wp8",
-      "tizen",
-      "firefoxos"
+      "ios"
     ]
   },
   "repository": {
@@ -26,14 +19,7 @@
     "battery",
     "ecosystem:cordova",
     "cordova-android",
-    "cordova-amazon-fireos",
-    "cordova-ubuntu",
-    "cordova-ios",
-    "cordova-blackberry10",
-    "cordova-wp7",
-    "cordova-wp8",
-    "cordova-tizen",
-    "cordova-firefoxos"
+    "cordova-ios"
   ],
   "scripts": {
     "test": "npm run jshint",
