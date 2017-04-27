@@ -25,42 +25,95 @@
  */
 var exec = cordova.require('cordova/exec');
 
+var BatteryManager = function() {
+  this.charging = true;
+  this.chargingTime = 0;
+  this.dischargingTime = Number.POSITIVE_INFINITY;
+  this.level = 0;
+  this._handlers = {
+    'chargingchange': [],
+    'chargingtimechange': [],
+    'dischargingtimechange': [],
+    'levelchange': []
+  };
+
+  this.onchargingchange = function() {};
+  this.onchargingtimechange = function() {};
+  this.ondischargingtimechange = function() {};
+  this.onlevelchange = function() {};
+
+  var that = this;
+  var success = function(batteryInfo) {
+    console.log("battery: " + JSON.stringify(that));
+    console.log("batteryInfo: " + JSON.stringify(batteryInfo));
+    if (that.charging !== batteryInfo.charging) {
+      console.log('firing charge event');
+      that.charging = batteryInfo.charging;
+      that.onchargingchange();
+      that.emit('chargingchange');
+    }
+    if (that.chargingTime !== batteryInfo.chargingTime) {
+      console.log('firing chargingTime event');
+      that.chargingTime = batteryInfo.chargingTime;
+      that.onchargingtimechange();
+      that.emit('chargingtimechange');
+    }
+    if (that.dischargingTime !== batteryInfo.dischargingTime) {
+      console.log('firing dischargingTime event');
+      that.dischargingTime = batteryInfo.dischargingTime;
+      that.ondischargingtimechange();
+      that.emit('dischargingtimechange');
+    }
+    if (that.level !== batteryInfo.level) {
+      console.log('firing level event');
+      that.level = batteryInfo.level;
+      that.onlevelchange();
+      that.emit('levelchange');
+    }
+  };
+
+  exec(success, null, "Battery","getBatteryStatus", []);
+};
+
+BatteryManager.prototype.addEventListener = function(eventName, callback) {
+  if (!this._handlers.hasOwnProperty(eventName)) {
+    this._handlers[eventName] = [];
+  }
+  this._handlers[eventName].push(callback);
+};
+
+BatteryManager.prototype.removeEventListener = function(eventName, handle) {
+  if (this._handlers.hasOwnProperty(eventName)) {
+    var handleIndex = this._handlers[eventName].indexOf(handle);
+    if (handleIndex >= 0) {
+      this._handlers[eventName].splice(handleIndex, 1);
+    }
+  }
+};
+
+BatteryManager.prototype.emit = function() {
+  var args = Array.prototype.slice.call(arguments);
+  var eventName = args.shift();
+
+  if (!this._handlers.hasOwnProperty(eventName)) {
+    return false;
+  }
+
+  for (var i = 0, length = this._handlers[eventName].length; i < length; i++) {
+    var callback = this._handlers[eventName][i];
+    if (typeof callback === 'function') {
+      callback.apply(undefined,args);
+    } else {
+      console.log('event handler: ' + eventName + ' must be a function');
+    }
+  }
+  return true;
+};
+
 var getBattery = function() {
   return new Promise(function(resolve, reject) {
-    var BatteryManager = {
-      charging: true,
-      chargingTime: 0,
-      dischargingTime: Number.POSITIVE_INFINITY,
-      level: 0,
-      onchargingchange: function() {},
-      onchargingtimechange: function() {},
-      ondischargingtimechange: function() {},
-      onlevelchange: function() {}
-    };
-
-    var success = function(batteryInfo) {
-      console.log("battery: " + JSON.stringify(batteryInfo));
-      if (BatteryManager.charging !== batteryInfo.charging) {
-        BatteryManager.charging = batteryInfo.charging;
-        BatteryManager.onchargingchange();
-      }
-      if (BatteryManager.chargingTime !== batteryInfo.chargingTime) {
-        BatteryManager.chargingTime = batteryInfo.chargingTime;
-        BatteryManager.onchargingtimechange();
-      }
-      if (BatteryManager.dischargingTime !== batteryInfo.dischargingTime) {
-        BatteryManager.dischargingTime = batteryInfo.dischargingTime;
-        BatteryManager.ondischargingtimechange();
-      }
-      if (BatteryManager.level !== batteryInfo.level) {
-        BatteryManager.level = batteryInfo.level;
-        BatteryManager.onlevelchange();
-      }
-
-      resolve(BatteryManager);
-    };
-
-    exec(success, reject, "Battery","getBatteryStatus", []);
+    var manager = new BatteryManager();
+    resolve(manager);
   });
 };
 
