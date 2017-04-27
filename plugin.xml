@@ -29,9 +29,9 @@
     <issue>https://issues.apache.org/jira/browse/CB/component/12320643</issue>
 
     <js-module src="www/battery.js" name="battery">
-        <clobbers target="navigator.battery" />
+        <clobbers target="navigator.getBattery" />
     </js-module>
-
+    <dependency id="es6-promise-plugin"/>
     <!-- android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
