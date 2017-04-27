@@ -18,48 +18,50 @@
  * under the License.
  *
 */
-
+/* globals Promise */
 /**
  * This class contains information about the current battery status.
  * @constructor
  */
-var cordova = require('cordova'),
-    exec = require('cordova/exec');
+var exec = cordova.require('cordova/exec');
 
-               var getBattery = function() {
-                return new Promise(function(resolve, reject) {
-                                  var BatteryManager = {
-                                  charging: true,
-                                  chargingTime: 0,
-                                  dischargingTime: Number.POSITIVE_INFINITY,
-                                  level: 0,
-                                  onchargingchange: function() {},
-                                  onchargingtimechange: function() {},
-                                  ondischargingtimechange: function() {},
-                                  onlevelchange: function() {}
-                                  };
-                                  var success = function(batteryInfo) {
-                                   console.log(batteryInfo.charging);
-                                   console.log(batteryInfo.level);
-                                   
-//                                  if (BatteryManager.charging !== batteryInfo.charging) {
-//                                  BatteryManager.onchargingchange(batteryInfo.charging);
-//                                  }
-//                                 
-//                                  if (BatteryManager.level !== batteryInfo.level) {
-//                                  BatteryManager.onlevelchange(batteryInfo.level);
-//                                  }
-//                                  BatteryManager.charging = batteryInfo.charging;
-//                                  BatteryManager.chargingTime = 0;
-//                                  BatteryManager.dischargingTime = Number.POSITIVE_INFINITY;
-//                                  BatteryManager.level = batteryInfo.level;
-                                  };
-                                  
-                                   var error = function(error){
-                                   
-                                   }
-                                  exec(success, error, "Battery","getBatteryStatus", []);
-                                  });
-               };
-               
-               module.exports = getBattery;
+var getBattery = function() {
+  return new Promise(function(resolve, reject) {
+    var BatteryManager = {
+      charging: true,
+      chargingTime: 0,
+      dischargingTime: Number.POSITIVE_INFINITY,
+      level: 0,
+      onchargingchange: function() {},
+      onchargingtimechange: function() {},
+      ondischargingtimechange: function() {},
+      onlevelchange: function() {}
+    };
+
+    var success = function(batteryInfo) {
+      console.log("battery: " + JSON.stringify(batteryInfo));
+      if (BatteryManager.charging !== batteryInfo.charging) {
+        BatteryManager.charging = batteryInfo.charging;
+        BatteryManager.onchargingchange();
+      }
+      if (BatteryManager.chargingTime !== batteryInfo.chargingTime) {
+        BatteryManager.chargingTime = batteryInfo.chargingTime;
+        BatteryManager.onchargingtimechange();
+      }
+      if (BatteryManager.dischargingTime !== batteryInfo.dischargingTime) {
+        BatteryManager.dischargingTime = batteryInfo.dischargingTime;
+        BatteryManager.ondischargingtimechange();
+      }
+      if (BatteryManager.level !== batteryInfo.level) {
+        BatteryManager.level = batteryInfo.level;
+        BatteryManager.onlevelchange();
+      }
+
+      resolve(BatteryManager);
+    };
+
+    exec(success, reject, "Battery","getBatteryStatus", []);
+  });
+};
+
+module.exports = getBattery;
