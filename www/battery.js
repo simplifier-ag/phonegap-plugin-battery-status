@@ -1,4 +1,3 @@
-cordova.define("cordova-plugin-battery-status.battery", function(require, exports, module) {
 /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -64,6 +63,3 @@ var cordova = require('cordova'),
                };
                
                module.exports = getBattery;
-
-
-});
