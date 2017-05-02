@@ -21,117 +21,78 @@ description: Get events for device battery level.
 #         under the License.
 -->
 
-|Android 4.4|Android 5.1|iOS 9.3|iOS 10.0|Windows 10 Store|Travis CI|
-|:-:|:-:|:-:|:-:|:-:|:-:|
-|[![Build Status](http://cordova-ci.cloudapp.net:8080/buildStatus/icon?job=cordova-periodic-build/PLATFORM=android-4.4,PLUGIN=cordova-plugin-battery-status)](http://cordova-ci.cloudapp.net:8080/job/cordova-periodic-build/PLATFORM=android-4.4,PLUGIN=cordova-plugin-battery-status/)|[![Build Status](http://cordova-ci.cloudapp.net:8080/buildStatus/icon?job=cordova-periodic-build/PLATFORM=android-5.1,PLUGIN=cordova-plugin-battery-status)](http://cordova-ci.cloudapp.net:8080/job/cordova-periodic-build/PLATFORM=android-5.1,PLUGIN=cordova-plugin-battery-status/)|[![Build Status](http://cordova-ci.cloudapp.net:8080/buildStatus/icon?job=cordova-periodic-build/PLATFORM=ios-9.3,PLUGIN=cordova-plugin-battery-status)](http://cordova-ci.cloudapp.net:8080/job/cordova-periodic-build/PLATFORM=ios-9.3,PLUGIN=cordova-plugin-battery-status/)|[![Build Status](http://cordova-ci.cloudapp.net:8080/buildStatus/icon?job=cordova-periodic-build/PLATFORM=ios-10.0,PLUGIN=cordova-plugin-battery-status)](http://cordova-ci.cloudapp.net:8080/job/cordova-periodic-build/PLATFORM=ios-10.0,PLUGIN=cordova-plugin-battery-status/)|[![Build Status](http://cordova-ci.cloudapp.net:8080/buildStatus/icon?job=cordova-periodic-build/PLATFORM=windows-10-store,PLUGIN=cordova-plugin-battery-status)](http://cordova-ci.cloudapp.net:8080/job/cordova-periodic-build/PLATFORM=windows-10-store,PLUGIN=cordova-plugin-battery-status/)|[![Build Status](https://travis-ci.org/apache/cordova-plugin-battery-status.svg?branch=master)](https://travis-ci.org/apache/cordova-plugin-battery-status)|
 
-# cordova-plugin-battery-status
+# phonegap-plugin-battery-status
 
-This plugin provides an implementation of an old version of the [Battery Status Events API][w3c_spec]. It adds the following three events to the `window` object:
+This plugin provides an implementation based on the [W3C Battery Status Events API](https://www.w3.org/TR/battery-status/). The method navigator.getBattery() returns a promise with a BatteryManager object which has the following event handlers:
 
-* batterystatus
-* batterycritical
-* batterylow
-
-Applications may use `window.addEventListener` to attach an event listener for any of the above events after the `deviceready` event fires.
+* onchargingchange
+* onchargingtimechange
+* ondischargingtimechange
+* onlevelchange
 
 ## Installation
 
-    cordova plugin add cordova-plugin-battery-status
+    phonegap plugin add phonegap-plugin-battery-status
 
 ## Status object
 
-All events in this plugin return an object with the following properties:
+The BatteryManager object has the following properties:
 
-- __level__: The battery charge percentage (0-100). _(Number)_
-- __isPlugged__: A boolean that indicates whether the device is plugged in. _(Boolean)_
+- level: The battery charge percentage (0-100). _(Number)_
+- charging: A boolean that indicates whether the device is plugged in. _(Boolean)_
+- chargingTime: The time remaining to fully charge the battery. _(Number)_
+- dischargingTime: The time remaining for the battery level to come down to 0. _(Number)_
 
-## batterystatus event
+## onchargingchange event
 
-Fires when the battery charge percentage changes by at least 1 percent, or when the device is plugged in or unplugged. Returns an [object][status_object] containing battery status.
-
-### Example
-
-    window.addEventListener("batterystatus", onBatteryStatus, false);
-
-    function onBatteryStatus(status) {
-        console.log("Level: " + status.level + " isPlugged: " + status.isPlugged);
-    }
-
-### Supported Platforms
-
-- Amazon Fire OS
-- iOS
-- Android
-- BlackBerry 10
-- Windows Phone 7 and 8
-- Windows (Windows Phone 8.1 and Windows 10)
-- Firefox OS
-- Browser (Chrome, Firefox, Opera)
-
-### Quirks: Android &amp; Amazon Fire OS
-
-**Warning**: the Android and Fire OS implementations are greedy and prolonged use will drain the device's battery.
-
-### Quirks: Windows Phone 7 &amp; Windows Phone 8
-
-The `level` property is _not_ supported on Windows Phone 7 because the OS does not provide native APIs to determine battery level. The `isPlugged` parameter _is_ supported.
-
-### Quirks: Windows Phone 8.1
-
-The `isPlugged` parameter is _not_ supported on Windows Phone 8.1. The `level` parameter _is_ supported.
-
-## batterylow event
-
-Fires when the battery charge percentage reaches the low charge threshold. This threshold value is device-specific. Returns an [object][status_object] containing battery status.
+Fires when the device is plugged in or unplugged.
 
 ### Example
 
-    window.addEventListener("batterylow", onBatteryLow, false);
+        navigator.getBattery().then(function(battery) {
+            battery.onchargingchange = function() {
+                console.log(this.level);
+            };
+        });
 
-    function onBatteryLow(status) {
-        alert("Battery Level Low " + status.level + "%");
-    }
+## onchargingtimechange event
 
-### Supported Platforms
-
-- Amazon Fire OS
-- iOS
-- Android
-- BlackBerry 10
-- Firefox OS
-- Windows (Windows Phone 8.1 and Windows 10)
-- Browser (Chrome, Firefox, Opera)
-
-### Quirks: Windows Phone 8.1
-
-The `batterylow` event fires on Windows Phone 8.1 irrespective of whether the device is plugged in or not. This happens because the OS does not provide an API to detect whether the device is plugged in.
-
-## batterycritical event
-
-Fires when the battery charge percentage reaches the critical charge threshold. This threshold value is device-specific. Returns an [object][status_object] containing battery status.
+Fires when the time required to charge the device changes.
 
 ### Example
 
-    window.addEventListener("batterycritical", onBatteryCritical, false);
+        navigator.getBattery().then(function(battery) {
+            console.log(battery.level);
+            battery.onchargingtimechange = function() {
+                console.log(this.level);
+            };
+        });
 
-    function onBatteryCritical(status) {
-        alert("Battery Level Critical " + status.level + "%\nRecharge Soon!");
-    }
+## ondischargingtimechange event
 
-### Supported Platforms
+Fires when the time required to discharge the device changes.
 
-- Amazon Fire OS
-- iOS
-- Android
-- BlackBerry 10
-- Firefox OS
-- Windows (Windows Phone 8.1 and Windows 10)
-- Browser (Chrome, Firefox, Opera)
+### Example
 
-### Quirks: Windows Phone 8.1
+        navigator.getBattery().then(function(battery) {
+            battery.ondischargingtimechange = function() {
+                console.log(this.level);
+            };
+        });
 
-The `batterycritical` event fires on Windows Phone 8.1 irrespective of whether the device is plugged in or not. This happens because the OS does not provide an API to detect whether the device is plugged in.
+## onlevelchange event
 
-[w3c_spec]: http://www.w3.org/TR/2011/WD-battery-status-20110915/
-[status_object]: #status-object
+Fires when the battery level of the device changes.
+
+### Example
+
+        navigator.getBattery().then(function(battery) {
+            battery.onlevelchange = function() {
+            console.log(this.level);
+            };
+        });
+
+
+### Quirks: The onchargingtimechange and the ondischargingtimechange events and the chargingtime and dischargingTime properties are not supported on iOS.  
+
