@@ -1,6 +1,6 @@
 {
   "name": "phonegap-plugin-battery-status",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Phonegap Battery Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
@@ -15,11 +15,11 @@
     "url": "https://github.com/phonegap/phonegap-plugin-battery-status"
   },
   "keywords": [
-    "phonegap",
+    "cordova",
     "battery",
     "ecosystem:cordova",
-    "phonegap-android",
-    "phonegap-ios"
+    "cordova-android",
+    "cordova-ios"
   ],
   "scripts": {
     "test": "npm run jshint",
