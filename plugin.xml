@@ -19,18 +19,18 @@
 -->
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-      id="cordova-plugin-battery-status"
-      version="1.2.4-dev">
+      id="phonegap-plugin-battery-status"
+      version="0.0.1">
     <name>Battery</name>
     <description>Cordova Battery Plugin</description>
     <license>Apache 2.0</license>
     <keywords>cordova,battery</keywords>
-    <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugin-battery-status.git</repo>
-    <issue>https://issues.apache.org/jira/browse/CB/component/12320643</issue>
+    <repo>https://github.com/phonegap/phonegap-plugin-battery-status.git</repo>
+    <issue>https://github.com/phonegap/phonegap-plugin-battery-status/issues</issue>
 
 
     <dependency id="es6-promise-plugin"/>
-    
+
     <!-- ios -->
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
@@ -44,5 +44,5 @@
         <header-file src="src/ios/CDVBattery.h" />
 	    <source-file src="src/ios/CDVBattery.m" />
     </platform>
-    
+
 </plugin>
