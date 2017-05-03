@@ -20,7 +20,6 @@
  */
 
 /* jshint jasmine: true */
-/* global Windows, WinJS */
 
 exports.defineAutoTests = function () {
 
@@ -78,20 +77,20 @@ exports.defineAutoTests = function () {
 exports.defineManualTests = function (contentEl, createActionButton) {
 
     /* Battery */
-    
+
     function getChargingChange(){
         navigator.getBattery().then(function (battery){
            battery.onchargingchange  = function() {
                 document.getElementById('pluggedValue').innerText = this.charging;
             };
-        });    
+        });
     }
     function getChargingTimeChange(){
         navigator.getBattery().then(function (battery){
            battery.onchargingchange  = function() {
                 document.getElementById('chrgTimeValue').innerText = this.chargingTime;
             };
-        });       
+        });
     }
     // function getdischargingTimeChange(){
     //     navigator.getBattery().then(function (battery){
@@ -100,14 +99,14 @@ exports.defineManualTests = function (contentEl, createActionButton) {
     //        battery.ondischargingtimechange  = function() {
     //             document.getElementById('dischrgTimeValue').innerText = this.dischargingTime;
     //         };
-    //     });        
+    //     });
     // }
     function getChargingLevel(){
-        navigator.getBattery().then(function (battery){         
+        navigator.getBattery().then(function (battery){
            battery.onlevelchange = function() {
                 document.getElementById('levelValue').innerText = this.level;
             };
-        });        
+        });
     }
     //Generate Dynamic Table
     function generateTable(tableId, rows, cells, elements) {
@@ -221,8 +220,7 @@ exports.defineManualTests = function (contentEl, createActionButton) {
                 row : 4,
                 cell : 1
             }
-        }
-        , {
+        }, {
             id : "chrgTimeTag",
             content : "Charging Time:",
             tag : "div",
@@ -238,7 +236,7 @@ exports.defineManualTests = function (contentEl, createActionButton) {
                 row : 5,
                 cell : 1
             }
-        }, 
+        },
         // {
         //     id : "dischrgTimeTag",
         //     content : "Discharging Time:",
@@ -281,7 +279,7 @@ exports.defineManualTests = function (contentEl, createActionButton) {
         '<div id="chckChargingTime"></div>';
         // '</p> Will update value for discharging time' +
         // '<div id="chckdischargingTime"></div>';
-    
+
     createActionButton('check charging change event', function () {
         getChargingChange();
     }, 'chckChargingChange');
@@ -296,4 +294,4 @@ exports.defineManualTests = function (contentEl, createActionButton) {
     // }, 'chckdischargingTime');
 
 
-};  
+};

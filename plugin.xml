@@ -22,7 +22,7 @@
       id="phonegap-plugin-battery-status"
       version="0.0.1">
     <name>Battery</name>
-    <description>Cordova Battery Plugin</description>
+    <description>PhoneGap Battery Plugin</description>
     <license>Apache 2.0</license>
     <keywords>cordova,battery</keywords>
     <repo>https://github.com/phonegap/phonegap-plugin-battery-status.git</repo>
