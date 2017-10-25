@@ -66,6 +66,8 @@
 - (NSMutableDictionary *)getBatteryInfo
 {
     UIDevice* currentDevice = [UIDevice currentDevice];
+    [currentDevice setBatteryMonitoringEnabled:YES];
+
     UIDeviceBatteryState currentState = [currentDevice batteryState];
 
 
