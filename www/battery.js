@@ -113,23 +113,27 @@ var getBattery = function() {
 
 module.exports = getBattery;
 
-var _batteryEventTrigger = navigator.getBattery().then(function (battery) {
-    cordova.fireWindowEvent('batterystatus', {
-        level: battery.level,
-        isPlugged: battery.charging
+
+var batteryStatus = cordova.addWindowEventHandler('batterystatus');
+batteryStatus.onHasSubscribersChange = function(){
+    navigator.getBattery().then(function (battery) {
+        cordova.fireWindowEvent('batterystatus', {
+            level: battery.level,
+            isPlugged: battery.charging
+        });
+
+        battery.onchargingchange = function () {
+            cordova.fireWindowEvent('batterystatus', {
+                level: battery.level,
+                isPlugged: battery.charging
+            });
+        };
+
+        battery.onlevelchange = function () {
+            cordova.fireWindowEvent('batterystatus', {
+                level: battery.level,
+                isPlugged: battery.charging
+            });
+        };
     });
-
-  battery.onchargingchange = function () {
-      cordova.fireWindowEvent('batterystatus', {
-          level: battery.level,
-          isPlugged: battery.charging
-      });
-  };
-
-  battery.onlevelchange = function () {
-      cordova.fireWindowEvent('batterystatus', {
-          level: battery.level,
-          isPlugged: battery.charging
-      });
-  };
-});
+};
