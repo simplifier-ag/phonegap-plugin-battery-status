@@ -114,8 +114,8 @@ var getBattery = function() {
 module.exports = getBattery;
 
 
-var batteryStatus = cordova.addWindowEventHandler('batterystatus');
-batteryStatus.onHasSubscribersChange = function(){
+var _batteryStatus = cordova.addWindowEventHandler('batterystatus');
+_batteryStatus.onHasSubscribersChange = function(){
     navigator.getBattery().then(function (battery) {
         cordova.fireWindowEvent('batterystatus', {
             level: parseInt(battery.level * 100),
@@ -134,6 +134,68 @@ batteryStatus.onHasSubscribersChange = function(){
                 level: parseInt(battery.level * 100),
                 isPlugged: battery.charging
             });
+        };
+    });
+};
+
+var _batteryLow = cordova.addWindowEventHandler('batterylow');
+_batteryLow.onHasSubscribersChange = function(){
+    var STATUS_LOW = 20;
+    navigator.getBattery().then(function (battery) {
+        if(parseInt(battery.level * 100) <= STATUS_LOW) {
+            cordova.fireWindowEvent('batterylow', {
+                level: parseInt(battery.level * 100),
+                isPlugged: battery.charging
+            });
+        }
+
+        battery.onchargingchange = function () {
+            if(parseInt(battery.level * 100) <= STATUS_LOW) {
+                cordova.fireWindowEvent('batterylow', {
+                    level: parseInt(battery.level * 100),
+                    isPlugged: battery.charging
+                });
+            }
+        };
+
+        battery.onlevelchange = function () {
+            if(parseInt(battery.level * 100) <= STATUS_LOW) {
+                cordova.fireWindowEvent('batterylow', {
+                    level: parseInt(battery.level * 100),
+                    isPlugged: battery.charging
+                });
+            }
+        };
+    });
+};
+
+var _batteryCritical = cordova.addWindowEventHandler('batterycritical');
+_batteryCritical.onHasSubscribersChange = function(){
+    var STATUS_CRITICAL = 5;
+    navigator.getBattery().then(function (battery) {
+        if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
+            cordova.fireWindowEvent('batterycritical', {
+                level: parseInt(battery.level * 100),
+                isPlugged: battery.charging
+            });
+        }
+
+        battery.onchargingchange = function () {
+            if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
+                cordova.fireWindowEvent('batterycritical', {
+                    level: parseInt(battery.level * 100),
+                    isPlugged: battery.charging
+                });
+            }
+        };
+
+        battery.onlevelchange = function () {
+            if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
+                cordova.fireWindowEvent('batterycritical', {
+                    level: parseInt(battery.level * 100),
+                    isPlugged: battery.charging
+                });
+            }
         };
     });
 };
