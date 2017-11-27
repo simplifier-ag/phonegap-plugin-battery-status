@@ -7,16 +7,48 @@
   <repo>https://github.com/phonegap/phonegap-plugin-battery-status.git</repo>
   <issue>https://github.com/phonegap/phonegap-plugin-battery-status/issues</issue>
   <dependency id="es6-promise-plugin"/>
+  <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
       <feature name="Battery">
         <param name="ios-package" value="CDVBattery"/>
       </feature>
     </config-file>
-    <js-module src="www/battery.js" name="battery">
+    <js-module src="www/batteryIOS.js" name="battery">
       <clobbers target="navigator.getBattery"/>
+      <clobbers target="navigator.battery" />
     </js-module>
     <header-file src="src/ios/CDVBattery.h"/>
     <source-file src="src/ios/CDVBattery.m"/>
+  </platform>
+
+  <!-- Android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Battery" >
+        <param name="android-package" value="org.apache.cordova.batterystatus.BatteryListener"/>
+      </feature>
+    </config-file>
+
+    <js-module src="www/battery.js" name="battery">
+      <clobbers target="navigator.getBattery"/>
+      <clobbers target="navigator.battery" />
+    </js-module>
+
+    <source-file src="src/android/BatteryListener.java" target-dir="src/org/apache/cordova/batterystatus" />
+  </platform>
+
+  <!-- Windows -->
+  <platform name="windows">
+    <js-module src="www/battery.js" name="battery">
+      <clobbers target="navigator.getBattery"/>
+      <clobbers target="navigator.battery" />
+    </js-module>
+
+    <js-module src="src/windows/BatteryProxy.js" name="Battery">
+      <runs />
+    </js-module>
+
+    <framework src="src/windows/BatteryStatus.winmd" custom="true" target="phone"/>
   </platform>
 </plugin>

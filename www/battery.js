@@ -18,184 +18,125 @@
  * under the License.
  *
 */
-/* globals Promise */
+
 /**
  * This class contains information about the current battery status.
  * @constructor
  */
-var exec = cordova.require('cordova/exec');
+var cordova = require('cordova');
+var exec = require('cordova/exec');
 
+var STATUS_CRITICAL = 5;
+var STATUS_LOW = 20;
+
+var Battery = function () {
+    this._level = null;
+    this._isPlugged = null;
+    // Create new event handlers on the window (returns a channel instance)
+    this.channels = {
+        batterystatus: cordova.addWindowEventHandler('batterystatus'),
+        batterylow: cordova.addWindowEventHandler('batterylow'),
+        batterycritical: cordova.addWindowEventHandler('batterycritical')
+    };
+    for (var key in this.channels) {
+        this.channels[key].onHasSubscribersChange = Battery.onHasSubscribersChange;
+    }
+};
+
+function handlers () {
+    return battery.channels.batterystatus.numHandlers +
+        battery.channels.batterylow.numHandlers +
+        battery.channels.batterycritical.numHandlers;
+}
+
+/**
+ * Event handlers for when callbacks get registered for the battery.
+ * Keep track of how many handlers we have so we can start and stop the native battery listener
+ * appropriately (and hopefully save on battery life!).
+ */
+Battery.onHasSubscribersChange = function () {
+    // If we just registered the first handler, make sure native listener is started.
+    if (this.numHandlers === 1 && handlers() === 1) {
+        exec(battery._status, battery._error, 'Battery', 'start', []);
+    } else if (handlers() === 0) {
+        exec(null, null, 'Battery', 'stop', []);
+    }
+};
+
+/**
+ * Callback for battery status
+ *
+ * @param {Object} info            keys: level, isPlugged
+ */
+Battery.prototype._status = function (info) {
+
+    if (info) {
+        if (battery._level !== info.level || battery._isPlugged !== info.isPlugged) {
+
+            if (info.level === null && battery._level !== null) {
+                return; // special case where callback is called because we stopped listening to the native side.
+            }
+
+            // Something changed. Fire batterystatus event
+            cordova.fireWindowEvent('batterystatus', info);
+
+            if (!info.isPlugged) { // do not fire low/critical if we are charging. issue: CB-4520
+                // note the following are NOT exact checks, as we want to catch a transition from
+                // above the threshold to below. issue: CB-4519
+                if (battery._level > STATUS_CRITICAL && info.level <= STATUS_CRITICAL) {
+                    // Fire critical battery event
+                    cordova.fireWindowEvent('batterycritical', info);
+                } else if (battery._level > STATUS_LOW && info.level <= STATUS_LOW) {
+                    // Fire low battery event
+                    cordova.fireWindowEvent('batterylow', info);
+                }
+            }
+            battery._level = info.level;
+            battery._isPlugged = info.isPlugged;
+        }
+    }
+};
+
+/**
+ * Error callback for battery start
+ */
+Battery.prototype._error = function (e) {
+    console.log('Error initializing Battery: ' + e);
+};
+
+var battery = new Battery(); // jshint ignore:line
+
+//Polyfill for new battery browser API
 var BatteryManager = function() {
   this.charging = true;
-  this.chargingTime = 0;
-  this.dischargingTime = Number.POSITIVE_INFINITY;
   this.level = 1.0;
-  this._handlers = {
-    'chargingchange': [],
-    'chargingtimechange': [],
-    'dischargingtimechange': [],
-    'levelchange': []
-  };
 
-  this.onchargingchange = function() {};
-  this.onchargingtimechange = function() {};
-  this.ondischargingtimechange = function() {};
-  this.onlevelchange = function() {};
+    this.onchargingchange = function() {};
+    this.onlevelchange = function() {};
 
-  var that = this;
-  var success = function(batteryInfo) {
-    if (that.charging !== batteryInfo.charging) {
-      that.charging = batteryInfo.charging;
-      that.onchargingchange();
-      that.emit('chargingchange');
-    }
-    if (that.chargingTime !== batteryInfo.chargingTime) {
-      that.chargingTime = batteryInfo.chargingTime;
-      that.onchargingtimechange();
-      that.emit('chargingtimechange');
-    }
-    if (that.dischargingTime !== batteryInfo.dischargingTime) {
-      that.dischargingTime = batteryInfo.dischargingTime;
-      that.ondischargingtimechange();
-      that.emit('dischargingtimechange');
-    }
-    if (that.level !== batteryInfo.level) {
-      that.level = batteryInfo.level;
-      that.onlevelchange();
-      that.emit('levelchange');
-    }
-  };
+    var that = this;
+    window.addEventListener("batterystatus", function(status){
 
-  exec(success, null, "Battery","getBatteryStatus", []);
+        if(that.charging !== status.isPlugged) {
+            that.charging = status.isPlugged;
+            that.onchargingchange()
+        }
+
+        var level = status.level/100;
+        if(that.level !== level) {
+            that.level = level;
+            that.onlevelchange();
+        }
+
+    }, false);
+
 };
 
-BatteryManager.prototype.addEventListener = function(eventName, callback) {
-  if (!this._handlers.hasOwnProperty(eventName)) {
-    this._handlers[eventName] = [];
-  }
-  this._handlers[eventName].push(callback);
-};
-
-BatteryManager.prototype.removeEventListener = function(eventName, handle) {
-  if (this._handlers.hasOwnProperty(eventName)) {
-    var handleIndex = this._handlers[eventName].indexOf(handle);
-    if (handleIndex >= 0) {
-      this._handlers[eventName].splice(handleIndex, 1);
-    }
-  }
-};
-
-BatteryManager.prototype.emit = function() {
-  var args = Array.prototype.slice.call(arguments);
-  var eventName = args.shift();
-
-  if (!this._handlers.hasOwnProperty(eventName)) {
-    return false;
-  }
-
-  for (var i = 0, length = this._handlers[eventName].length; i < length; i++) {
-    var callback = this._handlers[eventName][i];
-    if (typeof callback === 'function') {
-      callback.apply(undefined,args);
-    } else {
-      console.log('event handler: ' + eventName + ' must be a function');
-    }
-  }
-  return true;
-};
-
-var getBattery = function() {
-  return new Promise(function(resolve, reject) {
-    var manager = new BatteryManager();
-    resolve(manager);
-  });
+var getBattery = function(){
+    return new Promise(function(resolve, reject){
+        var manager = new BatteryManager();
+        resolve(manager);
+    });
 };
 
 module.exports = getBattery;
-
-
-var _batteryStatus = cordova.addWindowEventHandler('batterystatus');
-_batteryStatus.onHasSubscribersChange = function(){
-    navigator.getBattery().then(function (battery) {
-        cordova.fireWindowEvent('batterystatus', {
-            level: parseInt(battery.level * 100),
-            isPlugged: battery.charging
-        });
-
-        battery.onchargingchange = function () {
-            cordova.fireWindowEvent('batterystatus', {
-                level: parseInt(battery.level * 100),
-                isPlugged: battery.charging
-            });
-        };
-
-        battery.onlevelchange = function () {
-            cordova.fireWindowEvent('batterystatus', {
-                level: parseInt(battery.level * 100),
-                isPlugged: battery.charging
-            });
-        };
-    });
-};
-
-var _batteryLow = cordova.addWindowEventHandler('batterylow');
-_batteryLow.onHasSubscribersChange = function(){
-    var STATUS_LOW = 20;
-    navigator.getBattery().then(function (battery) {
-        if(parseInt(battery.level * 100) <= STATUS_LOW) {
-            cordova.fireWindowEvent('batterylow', {
-                level: parseInt(battery.level * 100),
-                isPlugged: battery.charging
-            });
-        }
-
-        battery.onchargingchange = function () {
-            if(parseInt(battery.level * 100) <= STATUS_LOW) {
-                cordova.fireWindowEvent('batterylow', {
-                    level: parseInt(battery.level * 100),
-                    isPlugged: battery.charging
-                });
-            }
-        };
-
-        battery.onlevelchange = function () {
-            if(parseInt(battery.level * 100) <= STATUS_LOW) {
-                cordova.fireWindowEvent('batterylow', {
-                    level: parseInt(battery.level * 100),
-                    isPlugged: battery.charging
-                });
-            }
-        };
-    });
-};
-
-var _batteryCritical = cordova.addWindowEventHandler('batterycritical');
-_batteryCritical.onHasSubscribersChange = function(){
-    var STATUS_CRITICAL = 5;
-    navigator.getBattery().then(function (battery) {
-        if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
-            cordova.fireWindowEvent('batterycritical', {
-                level: parseInt(battery.level * 100),
-                isPlugged: battery.charging
-            });
-        }
-
-        battery.onchargingchange = function () {
-            if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
-                cordova.fireWindowEvent('batterycritical', {
-                    level: parseInt(battery.level * 100),
-                    isPlugged: battery.charging
-                });
-            }
-        };
-
-        battery.onlevelchange = function () {
-            if(parseInt(battery.level * 100) <= STATUS_CRITICAL) {
-                cordova.fireWindowEvent('batterycritical', {
-                    level: parseInt(battery.level * 100),
-                    isPlugged: battery.charging
-                });
-            }
-        };
-    });
-};
