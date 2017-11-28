@@ -66,7 +66,7 @@ var BatteryManager = function() {
     }
   };
 
-  exec(success, null, "Battery","getBatteryStatus", []);
+  exec(success, null, "CDVBatteryStatus","getBatteryStatus", []);
 };
 
 BatteryManager.prototype.addEventListener = function(eventName, callback) {

@@ -10,16 +10,14 @@
   <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
-      <feature name="Battery">
-        <param name="ios-package" value="CDVBattery"/>
+      <feature name="CDVBatteryStatus">
+        <param name="ios-package" value="CDVBatteryStatus"/>
       </feature>
     </config-file>
+    <source-file src="src/ios/CDVBatteryStatus.swift" />
     <js-module src="www/batteryIOS.js" name="battery">
       <clobbers target="navigator.getBattery"/>
-      <clobbers target="navigator.battery" />
     </js-module>
-    <header-file src="src/ios/CDVBattery.h"/>
-    <source-file src="src/ios/CDVBattery.m"/>
   </platform>
 
   <!-- Android -->
