@@ -55,4 +55,5 @@ module.exports = {
   }
 };
 require('cordova/exec/proxy').add('Battery', module.exports);
+
   
