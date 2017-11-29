@@ -1,0 +1,14 @@
+{
+  "name": "phonegap-plugin-battery-status-tests",
+  "version": "1.0.0-dev",
+  "description": "",
+  "cordova": {
+    "id": "phonegap-plugin-battery-status-tests",
+    "platforms": []
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "",
+  "license": "Apache 2.0"
+}
