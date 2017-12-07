@@ -19,7 +19,7 @@
     }
 
     //Battery level did change
-    func batteryLevelDidChange(_ notification: Notification) {
+    @objc func batteryLevelDidChange(_ notification: Notification) {
         if self.callbackId != "" {
             let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: self.getBatteryInfo())
             pluginResult!.setKeepCallbackAs(true)
@@ -29,7 +29,7 @@
     }
 
     //Battery state did change (Plugin/Unplug)
-    func batteryStateDidChange(_ notification: Notification) {
+    @objc func batteryStateDidChange(_ notification: Notification) {
         if self.callbackId != "" {
             let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: self.getBatteryInfo())
             pluginResult!.setKeepCallbackAs(true)
