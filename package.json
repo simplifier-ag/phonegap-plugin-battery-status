@@ -1,6 +1,6 @@
 {
   "name": "phonegap-plugin-battery-status",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Phonegap Battery Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
