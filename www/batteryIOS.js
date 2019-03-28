@@ -26,10 +26,10 @@
 var exec = cordova.require('cordova/exec');
 
 var BatteryManager = function() {
-  this.charging = true;
+  this.charging = undefined;
   this.chargingTime = 0;
   this.dischargingTime = Number.POSITIVE_INFINITY;
-  this.level = 1.0;
+  this.level = -1.0;
   this._handlers = {
     'chargingchange': [],
     'chargingtimechange': [],
@@ -42,31 +42,40 @@ var BatteryManager = function() {
   this.ondischargingtimechange = function() {};
   this.onlevelchange = function() {};
 
-  var that = this;
   var success = function(batteryInfo) {
-    if (that.charging !== batteryInfo.charging) {
-      that.charging = batteryInfo.charging;
-      that.onchargingchange();
-      that.emit('chargingchange');
+    var temp = {
+      charging: this.charging,
+      chargingTime: this.chargingTime,
+      dischargingTime: this.dischargingTime,
+      level: this.level
+    };
+    this.charging = typeof batteryInfo.charging !== "undefined" ? batteryInfo.charging : this.charging;
+    this.chargingTime = typeof batteryInfo.chargingTime !== "undefined" ? batteryInfo.chargingTime : this.chargingTime;
+    this.dischargingTime = typeof batteryInfo.dischargingTime !== "undefined" ? batteryInfo.dischargingTime : this.dischargingTime;
+    this.level = typeof batteryInfo.level !== "undefined" ? batteryInfo.level : this.level;
+
+    if (temp.charging !== batteryInfo.charging) {
+      this.onchargingchange();
+      this.emit('chargingchange');
     }
-    if (that.chargingTime !== batteryInfo.chargingTime) {
-      that.chargingTime = batteryInfo.chargingTime;
-      that.onchargingtimechange();
-      that.emit('chargingtimechange');
+
+    if (temp.chargingTime !== batteryInfo.chargingTime) {
+      this.onchargingtimechange();
+      this.emit('chargingtimechange');
     }
-    if (that.dischargingTime !== batteryInfo.dischargingTime) {
-      that.dischargingTime = batteryInfo.dischargingTime;
-      that.ondischargingtimechange();
-      that.emit('dischargingtimechange');
+
+    if (temp.dischargingTime !== batteryInfo.dischargingTime) {
+      this.ondischargingtimechange();
+      this.emit('dischargingtimechange');
     }
-    if (that.level !== batteryInfo.level) {
-      that.level = batteryInfo.level;
-      that.onlevelchange();
-      that.emit('levelchange');
+    
+    if (temp.level !== batteryInfo.level) {
+      this.onlevelchange();
+      this.emit('levelchange');
     }
   };
 
-  exec(success, null, "CDVBatteryStatus","getBatteryStatus", []);
+  exec(success.bind(this), null, "CDVBatteryStatus","getBatteryStatus", []);
 };
 
 BatteryManager.prototype.addEventListener = function(eventName, callback) {
